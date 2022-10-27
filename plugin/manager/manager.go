@@ -398,7 +398,7 @@ func init() { // 插件主体
 						a := rand.Intn(100)
 						b := rand.Intn(100)
 						r := a + b
-						ctx.SendChain(message.At(uid), message.Text(fmt.Sprintf("考你一道题：%d+%d=?\n如果60秒之内答不上来，%s就要把你踢出去了哦~", a, b, zero.BotConfig.NickName[0])))
+						ctx.SendChain(message.At(uid), message.Text(fmt.Sprintf("考你一道题：%d+%d=?\n如果5分钟之内答不上来，%s就要把你踢出去了哦~", a, b, zero.BotConfig.NickName[0])))
 						// 匹配发送者进行验证
 						rule := func(ctx *zero.Ctx) bool {
 							for _, elem := range ctx.Event.Message {
@@ -419,7 +419,7 @@ func init() { // 插件主体
 						next := zero.NewFutureEvent("message", 999, false, ctx.CheckSession(), rule)
 						recv, cancel := next.Repeat()
 						select {
-						case <-time.After(time.Minute):
+						case <-time.After(time.Minute*5):
 							cancel()
 							ctx.SendChain(message.Text("拜拜啦~"))
 							ctx.SetGroupKick(ctx.Event.GroupID, uid, false)
