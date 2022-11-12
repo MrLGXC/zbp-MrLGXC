@@ -17,28 +17,23 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/message"
 )
 
-const (
-	replyServiceName = "aireply"
-	ttsServiceName   = "tts"
-)
-
 var replyModes = [...]string{"青云客", "小爱"}
 
 func init() { // 插件主体
-	enOftts := control.Register(ttsServiceName, &ctrl.Options[*zero.Ctx]{
+	enOftts := control.Register("tts", &ctrl.Options[*zero.Ctx]{
 		DisableOnDefault: true,
-		Help: "语音回复(大家一起来炼丹)\n" +
-			"- @Bot 任意文本(任意一句话回复)\n" +
+		Brief:            "人工智能语音回复",
+		Help: "- @Bot 任意文本(任意一句话回复)\n" +
 			"- 设置语音模式[原神人物]\n" +
 			"- 设置默认语音模式[原神人物]\n" +
 			"- 恢复成默认语音模式\n" +
 			"当前适用的原神人物含有以下：\n" + list(soundList[:], 5),
 	})
 	tts := newttsmode()
-	enOfreply := control.Register(replyServiceName, &ctrl.Options[*zero.Ctx]{
+	enOfreply := control.Register("aireply", &ctrl.Options[*zero.Ctx]{
 		DisableOnDefault: false,
-		Help: "人工智能回复\n" +
-			"- @Bot 任意文本(任意一句话回复)\n- 设置回复模式[青云客|小爱]",
+		Brief:            "人工智能回复",
+		Help:             "- @Bot 任意文本(任意一句话回复)\n- 设置回复模式[青云客|小爱]",
 	})
 	/*************************************************************
 	*******************************AIreply************************

@@ -47,11 +47,15 @@ const (
 		"- 取消在\"cron\"的提醒\n" +
 		"- 列出所有提醒\n" +
 		"- 翻牌\n" +
-		"- 设置欢迎语XXX 可选添加 [{at}] [{nickname}] [{avatar}] [{uid}] [{gid}] [{groupname}] {at}可在发送时艾特被欢迎者 {nickname}是被欢迎者名字 {avatar}是被欢迎者头像 {uid}是被欢迎者QQ号 {gid}是当前群群号 {groupname} 是当前群群名\n" +
+		"- 设置欢迎语XXX 可选添加 [{at}] [{nickname}] [{avatar}] [{uid}] [{gid}] [{groupname}]\n" +
 		"- 测试欢迎语\n" +
 		"- 设置告别辞 参数同设置欢迎语\n" +
 		"- 测试告别辞\n" +
-		"- [开启 | 关闭]入群验证"
+		"- [开启 | 关闭]入群验证\n" +
+		"- 对信息回复:[设置 | 取消]精华\n" +
+		"- 取消精华 [信息ID]\n" +
+		"- /精华列表\n" +
+		"Tips: {at}可在发送时艾特被欢迎者 {nickname}是被欢迎者名字 {avatar}是被欢迎者头像 {uid}是被欢迎者QQ号 {gid}是当前群群号 {groupname} 是当前群群名"
 )
 
 var (
@@ -62,6 +66,7 @@ var (
 func init() { // 插件主体
 	engine := control.Register("manager", &ctrl.Options[*zero.Ctx]{
 		DisableOnDefault:  false,
+		Brief:             "群管插件",
 		Help:              hint,
 		PrivateDataFolder: "manager",
 	})
@@ -575,6 +580,72 @@ func init() { // 插件主体
 			} else {
 				ctx.SetGroupAddRequest(ctx.Event.Flag, "add", false, reason)
 			}
+		}
+	})
+	// 设精
+	engine.OnRegex(`^\[CQ:reply,id=(-?\d+)\][\s\S]*(设置|取消)精华$`, zero.OnlyGroup, zero.AdminPermission).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
+		essenceID, _ := strconv.ParseInt(ctx.State["regex_matched"].([]string)[1], 10, 64)
+		option := ctx.State["regex_matched"].([]string)[2]
+		var rsp zero.APIResponse
+		switch option {
+		case "设置":
+			rsp = ctx.SetGroupEssenceMessage(essenceID)
+		case "取消":
+			rsp = ctx.DeleteGroupEssenceMessage(essenceID)
+		}
+		if rsp.RetCode == 0 {
+			ctx.SendChain(message.Text(option, "成功"))
+		} else {
+			ctx.SendChain(message.Text(option, "失败, 信息: ", rsp.Msg, "解释: ", rsp.Wording))
+		}
+	})
+	engine.OnCommand("精华列表", zero.OnlyGroup, zero.AdminPermission).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
+		list := ctx.GetGroupEssenceMessageList(ctx.Event.GroupID).Array()
+		msg := message.Message{ctxext.FakeSenderForwardNode(ctx, message.Text("本群精华列表："))}
+		n := len(list)
+		if n > 30 {
+			ctx.SendChain(message.Text("精华内容太多,仅显示前30个"))
+			n = 30
+		}
+		for _, info := range list[:n] {
+			msg = append(msg, ctxext.FakeSenderForwardNode(ctx,
+				message.Text(fmt.Sprintf(
+					"信息ID: %d\n发送者昵称: %s\n发送者QQ 号: %d\n消息发送时间: %s\n操作者昵称: %s\n操作者QQ 号: %d\n精华设置时间: %s",
+					info.Get("message_id").Int(),
+					info.Get("sender_nick").String(),
+					info.Get("sender_id").Int(),
+					time.Unix(info.Get("sender_time").Int(), 0).Format("2006/01/02 15:04:05"),
+					info.Get("operator_nick").String(),
+					info.Get("operator_id").Int(),
+					time.Unix(info.Get("operator_time").Int(), 0).Format("2006/01/02 15:04:05"),
+				))),
+			)
+			msgData := ctx.GetMessage(message.NewMessageIDFromInteger(info.Get("message_id").Int())).Elements
+			if msgData != nil {
+				msg = append(msg,
+					message.CustomNode(info.Get("sender_nick").String(), info.Get("sender_id").Int(), msgData),
+				)
+			} else {
+				msg = append(msg,
+					message.CustomNode(info.Get("sender_nick").String(), info.Get("sender_id").Int(), "[error]信息久远，无法获取,如需查看原始内容请在“精华信息”中查看"),
+				)
+			}
+		}
+		if id := ctx.Send(msg).ID(); id == 0 {
+			ctx.SendChain(message.Text("ERROR: 可能被风控了"))
+		}
+	})
+	engine.OnPrefix("取消精华", zero.OnlyGroup, zero.AdminPermission).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
+		essenceID, err := strconv.ParseInt(strings.TrimSpace(ctx.State["args"].(string)), 10, 64)
+		if err != nil {
+			ctx.SendChain(message.Text("ERROR: 请输入正确的设精ID"))
+			return
+		}
+		rsp := ctx.DeleteGroupEssenceMessage(essenceID)
+		if rsp.RetCode == 0 {
+			ctx.SendChain(message.Text("取消成功"))
+		} else {
+			ctx.SendChain(message.Text("取消失败, 信息: ", rsp.Msg, "解释: ", rsp.Wording))
 		}
 	})
 }
