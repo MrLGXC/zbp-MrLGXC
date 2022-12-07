@@ -2,6 +2,7 @@ package aireply
 
 import (
 	"errors"
+	"net/url"
 	"regexp"
 	"sync"
 
@@ -131,9 +132,9 @@ func getReplyMode(ctx *zero.Ctx) (name string) {
 ***********************tts************************************
 *************************************************************/
 type ttsmode struct {
-	sync.RWMutex
-	apikey string
-	mode   map[int64]int64
+	sync.RWMutex `json:"-"`
+	APIKey       string
+	mode         map[int64]int64
 }
 
 func list(list []string, num int) string {
@@ -165,21 +166,24 @@ func newttsmode() *ttsmode {
 	return tts
 }
 
-func (tts *ttsmode) getAPIKey() string {
-	return tts.apikey
+func (tts *ttsmode) getAPIKey(ctx *zero.Ctx) string {
+	if tts.APIKey == "" {
+		m := ctx.State["manager"].(*ctrl.Control[*zero.Ctx])
+		gid := ctx.Event.GroupID
+		if gid == 0 {
+			gid = -ctx.Event.UserID
+		}
+		_ = m.Manager.GetExtra(gid, &tts)
+	}
+	return url.QueryEscape(tts.APIKey)
 }
 
-func (tts *ttsmode) setAPIKey(ctx *zero.Ctx, key string) error {
-	gid := ctx.Event.GroupID
-	if gid == 0 {
-		gid = -ctx.Event.UserID
-	}
-	m := ctx.State["manager"].(*ctrl.Control[*zero.Ctx])
-	err := m.Manager.SetExtra(gid, &key)
+func (tts *ttsmode) setAPIKey(m *ctrl.Control[*zero.Ctx], grp int64, key string) error {
+	err := m.Manager.SetExtra(grp, &key)
 	if err != nil {
-		return errors.New("内部错误")
+		return err
 	}
-	tts.apikey = key
+	tts.APIKey = key
 	return nil
 }
 

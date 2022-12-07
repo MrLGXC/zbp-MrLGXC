@@ -27,6 +27,7 @@ func init() { // 插件主体
 			"- 设置语音模式[原神人物]\n" +
 			"- 设置默认语音模式[原神人物]\n" +
 			"- 恢复成默认语音模式\n" +
+			"- 为群 xxx 设置原神语音 api key xxxxxx (key请加开发群获得)\n" +
 			"当前适用的原神人物含有以下：\n" + list(soundList[:], 5),
 	})
 	tts := newttsmode()
@@ -82,7 +83,7 @@ func init() { // 插件主体
 					}
 					return numcn.EncodeFromFloat64(f)
 				}),
-			), tts.getAPIKey())).Add("cache", 0)
+			), tts.getAPIKey(ctx)))
 			// 发送语音
 			if ID := ctx.SendChain(record); ID.ID() == 0 {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(reply))
@@ -108,7 +109,7 @@ func init() { // 插件主体
 			ctx.SendChain(message.Text("配置的语音人物数据丢失！请重新设置语音人物。"))
 			return
 		}
-		record := message.Record(fmt.Sprintf(cnapi, i, url.QueryEscape(testRecord[soundList[i]]), tts.getAPIKey())).Add("cache", 0)
+		record := message.Record(fmt.Sprintf(cnapi, i, url.QueryEscape(testRecord[soundList[i]]), tts.getAPIKey(ctx))).Add("cache", 0)
 		if ID := ctx.SendChain(record); ID.ID() == 0 {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("设置失败！无法发送测试语音，请重试。"))
 			return
@@ -142,8 +143,9 @@ func init() { // 插件主体
 		index := tts.getSoundMode(ctx)
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("设置成功，当前为", soundList[index]))
 	})
-	ent.OnRegex(`^设置原神语音\s*api\s*key\s*([0-9a-zA-Z-_]{54}==)$`, zero.OnlyPrivate, zero.SuperUserPermission).SetBlock(true).Handle(func(ctx *zero.Ctx) {
-		err := tts.setAPIKey(ctx, ctx.State["regex_matched"].([]string)[1])
+	ent.OnRegex(`^为群\s*(-?\d+)\s*设置原神语音\s*api\s*key\s*([0-9a-zA-Z-_]{54}==)$`, zero.OnlyPrivate, zero.SuperUserPermission).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+		grp, _ := strconv.ParseInt(ctx.State["regex_matched"].([]string)[1], 10, 64)
+		err := tts.setAPIKey(ctx.State["manager"].(*ctrl.Control[*zero.Ctx]), grp, ctx.State["regex_matched"].([]string)[2])
 		if err != nil {
 			ctx.SendChain(message.Text("ERROR: ", err))
 			return
