@@ -442,7 +442,7 @@ func init() { // 插件主体
 						next := zero.NewFutureEvent("message", 999, false, ctx.CheckSession(), rule)
 						recv, cancel := next.Repeat()
 						select {
-						case <-time.After(time.Minute*5):
+						case <-time.After(time.Minute * 5):
 							cancel()
 							ctx.SendChain(message.Text("拜拜啦~"))
 							ctx.SetGroupKick(ctx.Event.GroupID, uid, false)

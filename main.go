@@ -252,7 +252,7 @@ func init() {
 	go webctrl.RunGui(*g)
 
 	// 通过代码写死的方式添加主人账号
-	 sus = append(sus, 10881256)
+	sus = append(sus, 10881256)
 	// sus = append(sus, 87654321)
 
 	if *runcfg != "" {
