@@ -8,15 +8,15 @@ import (
 	"strings"
 
 	"github.com/FloatTech/floatbox/math"
+	"github.com/FloatTech/imgfactory"
 	control "github.com/FloatTech/zbputils/control"
 	"github.com/FloatTech/zbputils/ctxext"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 
 	// 画图
-	"github.com/Coloured-glaze/gg"
 	"github.com/FloatTech/floatbox/file"
-	"github.com/FloatTech/floatbox/img/writer"
+	"github.com/FloatTech/gg"
 	"github.com/FloatTech/zbputils/img/text"
 
 	// 货币系统
@@ -140,14 +140,14 @@ func init() {
 			canvas.SetRGB(1, 1, 1) // 白色
 			canvas.Clear()
 			/***********下载字体***********/
-			_, err = file.GetLazyData(text.BoldFontFile, control.Md5File, true)
+			data, err := file.GetLazyData(text.BoldFontFile, control.Md5File, true)
 			if err != nil {
 				ctx.SendChain(message.Text("[ERROR]:ERROR: ", err))
 			}
 			/***********设置字体颜色为黑色***********/
 			canvas.SetRGB(0, 0, 0)
 			/***********设置字体大小,并获取字体高度用来定位***********/
-			if err = canvas.LoadFontFace(text.BoldFontFile, fontSize*2); err != nil {
+			if err = canvas.ParseFontFace(data, fontSize*2); err != nil {
 				ctx.SendChain(message.Text("[ERROR]:ERROR: ", err))
 				return
 			}
@@ -156,7 +156,7 @@ func init() {
 			canvas.DrawString("你的好感度排行列表", (1100-sl)/2, 100) // 放置在中间位置
 			canvas.DrawString("————————————————————", 0, 160)
 			/***********设置字体大小,并获取字体高度用来定位***********/
-			if err = canvas.LoadFontFace(text.BoldFontFile, fontSize); err != nil {
+			if err = canvas.ParseFontFace(data, fontSize); err != nil {
 				ctx.SendChain(message.Text("[ERROR]:ERROR: ", err))
 				return
 			}
@@ -189,9 +189,12 @@ func init() {
 				canvas.Fill()
 				i++
 			}
-			data, cl := writer.ToBytes(canvas.Image())
+			data, err = imgfactory.ToBytes(canvas.Image())
+			if err != nil {
+				ctx.SendChain(message.Text("[qqwife]ERROR: ", err))
+				return
+			}
 			ctx.SendChain(message.ImageBytes(data))
-			cl()
 		})
 
 	engine.OnFullMatch("好感度数据整理", zero.SuperUserPermission, getdb).SetBlock(true).Limit(ctxext.LimitByUser).
@@ -215,7 +218,9 @@ func init() {
 				delInfo = append(delInfo, favor.Userinfo)
 				// 解析旧数据
 				userList := strings.Split(favor.Userinfo, "+")
-				if userList[0] > userList[1] {
+				maxQQ, _ := strconv.ParseInt(userList[0], 10, 64)
+				minQQ, _ := strconv.ParseInt(userList[1], 10, 64)
+				if maxQQ > minQQ {
 					favor.Userinfo = userList[0] + "+" + userList[1]
 				} else {
 					favor.Userinfo = userList[1] + "+" + userList[0]
