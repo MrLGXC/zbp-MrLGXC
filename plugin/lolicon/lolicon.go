@@ -32,7 +32,7 @@ var (
 )
 
 func init() {
-	en := control.Register("lolicon", &ctrl.Options[*zero.Ctx]{
+	en := control.AutoRegister(&ctrl.Options[*zero.Ctx]{
 		DisableOnDefault: false,
 		Brief:            "随机图片",
 		Help: "- 随机图片\n" +
@@ -115,5 +115,5 @@ func getimgurl(url string) (string, error) {
 	if imageurl = json.Get("data.0.urls.original").Str; imageurl == "" {
 		return "", errors.New("未找到相关内容, 换个tag试试吧")
 	}
-	return strings.ReplaceAll(imageurl, "i.pixiv.cat", "i.pixiv.re"), nil
+	return imageurl, nil
 }
