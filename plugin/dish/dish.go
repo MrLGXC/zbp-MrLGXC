@@ -77,7 +77,8 @@ func init() {
 		}
 
 		var d dish
-		if err := db.Find("dish", &d, fmt.Sprintf("WHERE name like %%%s%%", dishName)); err != nil {
+		if err := db.Find("dish", &d, fmt.Sprintf("WHERE name like '%%%s%%'", dishName)); err != nil {
+			ctx.SendChain(message.Text("客官，本店没有" + dishName))
 			return
 		}
 
@@ -86,17 +87,17 @@ func init() {
 				"原材料：%s\n"+
 				"步骤：\n"+
 				"%s",
-			name, dishName, d.Materials, d.Steps),
+			name, d.Name, d.Materials, d.Steps),
 		))
 	})
 
-	en.OnPrefixGroup([]string{"随机菜谱", "随便做点菜"}).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
+	en.OnFullMatchGroup([]string{"随机菜谱", "随便做点菜"}).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
 		if !initialized {
 			ctx.SendChain(message.Text("客官，本店暂未开业"))
 			return
 		}
 
-		name := ctx.NickName()
+		name := ctx.CardOrNickName(ctx.Event.UserID)
 		var d dish
 		if err := db.Pick("dish", &d); err != nil {
 			ctx.SendChain(message.Text("小店好像出错了，暂时端不出菜来惹"))
