@@ -139,13 +139,11 @@ func init() {
 		// 更新钱包
 		rank := getrank(level)
 		add := 1 + rand.Intn(10) + rank*5 // 等级越高获得的钱越高
-		go func() {
-			err = wallet.InsertWalletOf(uid, add)
-			if err != nil {
-				ctx.SendChain(message.Text("ERROR: ", err))
-				return
-			}
-		}()
+		err = wallet.InsertWalletOf(uid, add)
+		if err != nil {
+			ctx.SendChain(message.Text("ERROR: ", err))
+			return
+		}
 		alldata := &scdata{
 			drawedfile: drawedFile,
 			picfile:    picFile,
@@ -325,7 +323,7 @@ func getrank(count int) int {
 
 func initPic(picFile string, uid int64) (avatar []byte, err error) {
 	defer process.SleepAbout1sTo2s()
-	avatar, err = web.GetData("http://q4.qlogo.cn/g?b=qq&nk=" + strconv.FormatInt(uid, 10) + "&s=640")
+	avatar, err = web.GetData("https://q4.qlogo.cn/g?b=qq&nk=" + strconv.FormatInt(uid, 10) + "&s=640")
 	if err != nil {
 		return
 	}
