@@ -1,8 +1,8 @@
 github.com/Baidu-AIP/golang-sdk v1.1.1 h1:RQsAmgDSAkiq22I6n7XJ2t3afgzFeqjY46FGhvrx4cw=
 github.com/Baidu-AIP/golang-sdk v1.1.1/go.mod h1:bXnGw7xPeKt8aF7UCELKrV6UZ/46spItONK1RQBQj1Y=
 github.com/DATA-DOG/go-sqlmock v1.3.3/go.mod h1:f/Ixk793poVmq4qj/V1dPUg2JEAKC73Q5eFN3EC/SaM=
-github.com/FloatTech/AnimeAPI v1.7.1-0.20240530072450-71c23d2f01f8 h1:2i36tl5VlBWxWxv4WyfWmCA23NaV1fB5/smJtdORHf4=
-github.com/FloatTech/AnimeAPI v1.7.1-0.20240530072450-71c23d2f01f8/go.mod h1:Ru6q5pZUnfMg1iu0M1Hp73q9N3LNIbDr16kjkzyG6Xk=
+github.com/FloatTech/AnimeAPI v1.7.1-0.20240826120833-9bf54389aadb h1:j7m84zwcDWLoMLjgG4MDnvanGQoDNnG8A7/aNCnYMIk=
+github.com/FloatTech/AnimeAPI v1.7.1-0.20240826120833-9bf54389aadb/go.mod h1:Ru6q5pZUnfMg1iu0M1Hp73q9N3LNIbDr16kjkzyG6Xk=
 github.com/FloatTech/floatbox v0.0.0-20240505082030-226ec6713e14 h1:8O0Iq9MnKsKowltY9txhOqcJdmGTjxHPQ4gEYzbJc9A=
 github.com/FloatTech/floatbox v0.0.0-20240505082030-226ec6713e14/go.mod h1:OzGLhvmtz1TKIdGaJDd8pQumvD36UqK+dWsiCISmzQQ=
 github.com/FloatTech/gg v1.1.3 h1:+GlL02lTKsxJQr4WCuNwVxC1/eBZrCvypCIBtxuOFb4=
@@ -76,6 +76,8 @@ github.com/fumiama/jieba v0.0.0-20221203025406-36c17a10b565 h1:sQuR2+N5HurnvsZhi
 github.com/fumiama/jieba v0.0.0-20221203025406-36c17a10b565/go.mod h1:UUEvyLTJ7yoOA/viKG4wEis4ERydM7+Ny6gZUWgkS80=
 github.com/fumiama/libc v0.0.0-20240530081950-6f6d8586b5c5 h1:jDxsIupsT84A6WHcs6kWbst+KqrRQ8/o0VyoFMnbBOA=
 github.com/fumiama/libc v0.0.0-20240530081950-6f6d8586b5c5/go.mod h1:15P6ublJ9FJR8YQCGy8DeQ2Uwur7iW9Hserr/T3OFZE=
+github.com/fumiama/slowdo v0.0.0-20241001074058-27c4fe5259a4 h1:zN9e09TYKXI1mNkuS6YbH+Sn+4k5tBir+ovhZZcRYAs=
+github.com/fumiama/slowdo v0.0.0-20241001074058-27c4fe5259a4/go.mod h1:iZf1H/Jcw5gjOOFb4C5nlweJtViWc7uwUxRCe14pbYk=
 github.com/fumiama/sqlite3 v1.29.10-simp h1:c5y3uKyU0q9t0/SyfynzYyuslQ5zP+5CD8e0yYY554A=
 github.com/fumiama/sqlite3 v1.29.10-simp/go.mod h1:ItX2a1OVGgNsFh6Dv60JQvGfJfTPHPVpV6DF59akYOA=
 github.com/fumiama/terasu v0.0.0-20240507144117-547a591149c0 h1:So/3Bg/m2ZcUvqCzzEjjkjHBjcvnV3AN5tCxwsdMwYU=

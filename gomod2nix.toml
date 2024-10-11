@@ -5,8 +5,8 @@ schema = 3
     version = "v1.1.1"
     hash = "sha256-hKshA0K92bKuK92mmtM0osVmqLJcSbeobeWSDpQoRCo="
   [mod."github.com/FloatTech/AnimeAPI"]
-    version = "v1.7.1-0.20240530072450-71c23d2f01f8"
-    hash = "sha256-NUYNGhjVW5bdpWIeKjBhnVTsjf6OXNqCcqzrRd3c+gE="
+    version = "v1.7.1-0.20240826120833-9bf54389aadb"
+    hash = "sha256-PHquMHGtJmONbCwo5tiGGFKcPv4fQtNIunqw29v4Xv8="
   [mod."github.com/FloatTech/floatbox"]
     version = "v0.0.0-20240505082030-226ec6713e14"
     hash = "sha256-v296D9T1QzFmcHQJNxJvx7sMtK+Jd1TUHXWqZtIvvf4="
@@ -97,6 +97,9 @@ schema = 3
   [mod."github.com/fumiama/jieba"]
     version = "v0.0.0-20221203025406-36c17a10b565"
     hash = "sha256-DvDx1pdldkdaSszrbadM/VwqT9TTSmWl6G6a+ysXYEM="
+  [mod."github.com/fumiama/slowdo"]
+    version = "v0.0.0-20241001074058-27c4fe5259a4"
+    hash = "sha256-rsV3MKRCSOBMIgJXFCGbCHRY2aBAb32ftU49hT3GjqY="
   [mod."github.com/fumiama/terasu"]
     version = "v0.0.0-20240507144117-547a591149c0"
     hash = "sha256-ZZG5/Ckq4R0eojmiuli5ZRToDNQt4VeRwdy0jjVCvbg="

@@ -2,153 +2,16 @@
 package niuniu
 
 import (
-	"errors"
 	"fmt"
 	"math"
 	"math/rand"
-	"time"
+	"strings"
 )
 
-func createUserInfoByProps(props string, niuniu userInfo) error {
-	var (
-		err error
-	)
-	switch props {
-	case "伟哥":
-		if niuniu.WeiGe > 0 {
-			niuniu.WeiGe--
-		} else {
-			err = errors.New("你还没有伟哥呢,不能使用")
-		}
-	case "媚药":
-		if niuniu.Philter > 0 {
-			niuniu.Philter--
-		} else {
-			err = errors.New("你还没有媚药呢,不能使用")
-		}
-	case "击剑神器":
-		if niuniu.Artifact > 0 {
-			niuniu.Artifact--
-		} else {
-			err = errors.New("你还没有击剑神器呢,不能使用")
-		}
-	case "击剑神稽":
-		if niuniu.ShenJi > 0 {
-			niuniu.ShenJi--
-		} else {
-			err = errors.New("你还没有击剑神稽呢,不能使用")
-		}
-	default:
-		err = errors.New("道具不存在")
-	}
-	return err
-}
-
-// 接收值依次是 自己和被jj用户的信息 一个包含gid和uid的字符串 道具名称
-// 返回值依次是 要发生的消息 错误信息
-func processJJuAction(myniuniu, adduserniuniu userInfo, t string, props string) (string, float64, error) {
-	var (
-		fencingResult string
-		f             float64
-		f1            float64
-		u             userInfo
-		err           error
-	)
-	v, ok := prop.Load(t)
-	u = myniuniu
-	if props != "" {
-		if props != "击剑神器" && props != "击剑神稽" {
-			return "", 0, errors.New("道具不存在")
-		}
-		if err = createUserInfoByProps(props, myniuniu); err != nil {
-			return "", 0, err
-		}
-	}
-	switch {
-	case ok && v.Count > 1 && time.Since(v.TimeLimit) < time.Minute*8:
-		fencingResult, f, f1 = fencing(myniuniu.Length, adduserniuniu.Length)
-		myniuniu.Length = f
-		errMessage := fmt.Sprintf("你使用道具次数太快了，此次道具不会生效，等待%d再来吧", time.Minute*8-time.Since(v.TimeLimit))
-		err = errors.New(errMessage)
-	case myniuniu.ShenJi-u.ShenJi != 0:
-		fencingResult, f, f1 = myniuniu.useShenJi(adduserniuniu.Length)
-		myniuniu.Length = f
-		updateMap(t, true)
-	case myniuniu.Artifact-u.Artifact != 0:
-		fencingResult, f, f1 = myniuniu.useArtifact(adduserniuniu.Length)
-		myniuniu.Length = f
-		updateMap(t, true)
-	default:
-		fencingResult, f, f1 = fencing(myniuniu.Length, adduserniuniu.Length)
-		myniuniu.Length = f
-	}
-	return fencingResult, f1, err
-}
-func processNiuniuAction(t string, niuniu userInfo, props string) (string, error) {
-	var (
-		messages string
-		f        float64
-		u        userInfo
-		err      error
-	)
-	load, ok := prop.Load(t)
-	u = niuniu
-	if props != "" {
-		if props != "伟哥" && props != "媚药" {
-			return "", errors.New("道具不存在")
-		}
-
-		if err = createUserInfoByProps(props, niuniu); err != nil {
-			return "", err
-		}
-	}
-	switch {
-	case ok && load.Count > 1 && time.Since(load.TimeLimit) < time.Minute*8:
-		messages, f = generateRandomStingTwo(niuniu.Length)
-		niuniu.Length = f
-		errMessage := fmt.Sprintf("你使用道具次数太快了，此次道具不会生效，等待%d再来吧", time.Minute*8-time.Since(load.TimeLimit))
-		err = errors.New(errMessage)
-
-	case niuniu.WeiGe-u.WeiGe != 0:
-		messages, f = niuniu.useWeiGe()
-		niuniu.Length = f
-		updateMap(t, true)
-
-	case niuniu.Philter-u.Philter != 0:
-		messages, f = niuniu.usePhilter()
-		niuniu.Length = f
-		updateMap(t, true)
-
-	default:
-		messages, f = generateRandomStingTwo(niuniu.Length)
-		niuniu.Length = f
-	}
-	return messages, err
-}
-
-func purchaseItem(n int, info userInfo) (*userInfo, int, error) {
-	var (
-		money int
-		err   error
-	)
-	switch n {
-	case 1:
-		money = 300
-		info.WeiGe += 5
-	case 2:
-		money = 300
-		info.Philter += 5
-	case 3:
-		money = 500
-		info.Artifact += 2
-	case 4:
-		money = 500
-		info.ShenJi += 2
-	default:
-		err = errors.New("无效的选择")
-	}
-	return &info, money, err
-}
+var (
+	jjProp     = []string{"击剑神器", "击剑神稽"}
+	dajiaoProp = []string{"伟哥", "媚药"}
+)
 
 func generateRandomStingTwo(niuniu float64) (string, float64) {
 	probability := rand.Intn(100 + 1)
@@ -293,6 +156,7 @@ func calculateWinProbability(heightA, heightB float64) float64 {
 // applySkill 应用击剑技巧并生成结果
 func applySkill(myLength, oppoLength float64, increaseLength1 bool) (string, float64, float64) {
 	reduce := fence(oppoLength)
+	// 兜底操作
 	if reduce == 0 {
 		reduce = rand.Float64() + float64(rand.Intn(3))
 	}
@@ -314,10 +178,12 @@ func applySkill(myLength, oppoLength float64, increaseLength1 bool) (string, flo
 
 // fence 根据长度计算减少的长度
 func fence(rd float64) float64 {
-	r := hitGlue(rd)*2 + rand.Float64()*math.Log2(rd)
-	if rand.Intn(2) == 1 {
-		return rd - rand.Float64()*r
+	rd = math.Abs(rd)
+	if rd == 0 {
+		rd = 1
 	}
+	r := hitGlue(rd)*2 + rand.Float64()*math.Log2(rd)
+
 	return float64(int(r * rand.Float64()))
 }
 
@@ -338,4 +204,14 @@ func hitGlue(l float64) float64 {
 	default:
 		return rand.Float64()
 	}
+}
+
+// 检查字符串是否在切片中
+func contains(s string, array []string) bool {
+	for _, item := range array {
+		if strings.EqualFold(item, s) {
+			return true
+		}
+	}
+	return false
 }
